@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture Notes Generator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #fileInput {
+            display: none; /* Hide the default file input */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Welcome to the Lecture Notes Generator</h1>
+        <p>This web app allows you to convert speech to text and summarize lecture notes.</p>
+        
+        <!-- Hidden file input -->
+        <input type="file" id="fileInput" accept="audio/*" onchange="uploadFile()">
+
+        <!-- Button to trigger file input -->
+        <button class="btn btn-primary mt-3" onclick="document.getElementById('fileInput').click();">
+            Upload Audio File
+        </button>
+        
+        <!-- Button to view uploaded audio files -->
+        <a href="/uploads" class="btn btn-secondary mt-3">
+            View Uploaded Audio Files
+        </a>
+        
+        <!-- Button to view summary page -->
+        <a href="/results" class="btn btn-info mt-3">
+            View Results
+        </a>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('audio_file', fileInput.files[0]);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Handle success or redirect to summary page
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

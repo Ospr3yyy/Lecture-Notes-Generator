@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Limit the width of the content column and allow wrapping */
+        .content-column {
+            max-width: 300px; /* Set a maximum width for the content */
+            word-wrap: break-word; /* Allow long words to break onto the next line */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Results of Uploaded Files</h1>
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Contents</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file, content in summaries.items() %}
+                <tr>
+                    <td>{{ file }}</td>
+                    <td class="content-column"><pre>{{ content }}</pre></td> <!-- Add the class to the content column -->
+                    <td><a href="{{ url_for('uploaded_result', filename=file) }}" class="btn btn-success">Download</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/" class="btn btn-primary">Back to Home</a>
+    </div>
+</body>
+</html>
