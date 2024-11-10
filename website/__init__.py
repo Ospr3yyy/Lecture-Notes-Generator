@@ -1,8 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
+import mysql.connector
 from werkzeug.utils import secure_filename
 from transformers import pipeline
 import os
-import librosa 
+import librosa
 
 def create_app():
     # Initialize Flask app
@@ -10,6 +11,14 @@ def create_app():
     app.config['SECRET_KEY'] = 'your_secret_key'
     app.config['UPLOAD_FOLDER'] = 'uploads/'
     app.config['RESULT_FOLDER'] = 'results/'  # Folder to save results
+    
+    db_config = {
+        'host': 'localhost',
+        'user': 'root',  # your MySQL username
+        'password': '',  # your MySQL password
+        'database': '120l',  # your database name
+        'ssl_disabled': True
+    }
 
     # Initialize Transformers pipelines
     speech_to_text_pipeline = pipeline("automatic-speech-recognition", model="facebook/wav2vec2-large-960h")
@@ -21,7 +30,37 @@ def create_app():
 
     # Routes
     @app.route('/')
-    def index():
+    def start():
+        return render_template('login.html')
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        connection = mysql.connector.connect(**db_config)
+        if request.method == 'POST':
+            email = request.form['email']
+            password = request.form['password']
+            
+            try:
+                # Use dictionary=True to fetch results as a dictionary
+                cur = connection.cursor(dictionary=True)
+                cur.execute('SELECT * FROM user WHERE email = %s', (email,))
+                user = cur.fetchone()
+                
+                if user and user['password'] == password:
+                    return redirect(url_for('index'))
+                else:
+                    flash('Invalid email or password', 'danger')
+            
+            except mysql.connector.Error as err:
+                flash(f"Error: {err}", 'danger')
+            finally:
+                cur.close()
+                connection.close()
+            
+        return render_template('login.html')  # Render the login form template
+
+    @app.route('/index')
+    def index(): 
         return render_template('index.html')
 
     @app.route('/upload', methods=['GET', 'POST'])
@@ -85,6 +124,30 @@ def create_app():
                 summaries[filename] = file.read()  # Read content of each result file
 
         return render_template('results.html', summaries=summaries)
+    
+    @app.route('/test')
+    def test_db():
+        try:
+            # Establish connection using mysql-connector-python
+            connection = mysql.connector.connect(**db_config)
+            
+            # Test the database connection by running a simple query
+            cursor = connection.cursor()
+            cursor.execute("SELECT DATABASE()")
+            db_name = cursor.fetchone()
+            
+            # Return the name of the connected database
+            return f"Connected to database: {db_name[0]}"
+        
+        except mysql.connector.Error as e:
+            # Catch MySQL errors and return the error message
+            return f"Error: {str(e)}"
+        
+        finally:
+            # Ensure the connection is closed after use
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
 
 
 
