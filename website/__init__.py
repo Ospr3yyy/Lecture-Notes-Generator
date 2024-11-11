@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
+from flask import Flask, session, request, render_template, redirect, url_for, flash, send_from_directory
 import mysql.connector
 from werkzeug.utils import secure_filename
 from transformers import pipeline
@@ -10,6 +10,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your_secret_key'
     app.config['UPLOAD_FOLDER'] = 'uploads/'
+    app.config['TEMP_FOLDER'] = 'temp/'
     app.config['RESULT_FOLDER'] = 'results/'  # Folder to save results
     
     db_config = {
@@ -26,6 +27,7 @@ def create_app():
 
     # Ensure upload and result directories exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['TEMP_FOLDER'], exist_ok=True)
     os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
     # Routes
@@ -47,6 +49,7 @@ def create_app():
                 user = cur.fetchone()
                 
                 if user and user['password'] == password:
+                    session['uid'] = user['uid']
                     return redirect(url_for('index'))
                 else:
                     flash('Invalid email or password', 'danger')
@@ -57,7 +60,7 @@ def create_app():
                 cur.close()
                 connection.close()
             
-        return render_template('login.html')  # Render the login form template
+        return render_template('login.html')
 
     @app.route('/index')
     def index(): 
@@ -75,24 +78,70 @@ def create_app():
                 flash('No selected file')
                 return redirect(request.url)
 
+            # Connect to DB
+            connection = mysql.connector.connect(**db_config)
+
             if file:
                 filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(filepath)
+                temp = os.path.join(app.config['TEMP_FOLDER'], filename)
+                
+                # Create temp file for audio transcription
+                file.save(temp)
+                    
+                # read file as binary
+                file.seek(0)
+                audio_file = file.read()
+                
+                try:
+                    upload_query = """
+                    INSERT INTO audio_file (title, file)
+                    VALUES (%s, %s)
+                    """
+                    cur = connection.cursor()
+                    
+                    cur.execute(upload_query, (filename, audio_file))
+                    
+                    #audio_db_data = cur.fetchone()
+                    file_id = cur.lastrowid
+                    connection.commit()
+                    
+                    flash('Audio file uploaded successfully as a file in the database!', 'success')
+                except mysql.connector.Error as err:
+                    flash(f"Database error: {err}", 'danger')
+                    print(err)
+                finally:
+                    cur.close()
 
                 # Process audio file (speech-to-text and summarization)
-                transcribed_text = transcribe_audio(filepath, speech_to_text_pipeline)
+                transcribed_text = transcribe_audio(temp, speech_to_text_pipeline)
                 summarized_text = summarize_text(transcribed_text, summarization_pipeline)
+                    
+                # Save results to db
+                try:
+                    content = f"Transcription:\n{transcribed_text}\n\nSummary:\n{summarized_text}"
+                    txt_data = content.encode('utf-8')
+                    result_query = """
+                        INSERT INTO note (file_id, uid, title, transcribed_file)
+                        VALUES (%s, %s, %s, %s)
+                    """
+                    cur = connection.cursor()
+                    cur.execute(result_query, (file_id, session['uid'], f'{filename}_results.txt', txt_data))
+                    connection.commit()
+                    flash('Notes successfully created as a file in the database!', 'success')
+                except mysql.connector.Error as err:
+                    flash(f"Database error: {err}", 'danger')
+                finally:
+                    cur.close()
+                    connection.close()
 
-                # Save results to a local file
-                result_filename = f"{os.path.splitext(filename)[0]}_results.txt"
-                result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
-
-                with open(result_filepath, 'w') as result_file:
-                    result_file.write("Transcription:\n")
-                    result_file.write(transcribed_text + "\n\n")
-                    result_file.write("Summary:\n")
-                    result_file.write(summarized_text)
+                # Delete temp file
+                try:
+                    if os.path.exists(temp):
+                        os.remove(temp)
+                    else:
+                        flash('Temporary file not found, could not be deleted', 'warning')
+                except Exception as e:
+                    flash('Audio file uploaded successfully as a file in the database!', 'success')
 
                 return render_template('summary.html', transcription=transcribed_text, summary=summarized_text)
 
@@ -104,8 +153,26 @@ def create_app():
     
     @app.route('/uploads')
     def uploaded_files():
-        # List all files in the uploads directory
-        audio_files = os.listdir(app.config['UPLOAD_FOLDER'])
+        # List all files in db
+        connection = mysql.connector.connect(**db_config)
+        try:
+            get_audio_query = """
+                SELECT audio_file.title
+                FROM audio_file
+                JOIN note ON audio_file.file_id = note.file_id
+                WHERE note.uid = %s
+            """
+            cur = connection.cursor()
+            
+            cur.execute(get_audio_query, (session['uid'],))
+            audio_files = [row[0] for row in cur.fetchall()]
+        except mysql.connector.Error as err:
+            flash(f"Database error: {err}", 'danger')
+            print(err)
+        finally:
+            cur.close()
+            connection.close()
+        #audio_files = os.listdir(app.config['UPLOAD_FOLDER'])
         return render_template('uploads.html', audio_files=audio_files)
     
     
@@ -116,12 +183,33 @@ def create_app():
     @app.route('/results')
     def uploaded_results():
         # List all files in the results directory and read their contents
-        result_files = os.listdir(app.config['RESULT_FOLDER'])
+        connection = mysql.connector.connect(**db_config)
+        try:
+            get_results_query = """
+                SELECT *
+                FROM note
+                WHERE note.uid = %s
+            """
+            cur = connection.cursor()
+            cur.execute(get_results_query, (session['uid'],))
+            results=cur.fetchall()
+        except mysql.connector.Error as err:
+            flash(f"Database error: {err}", 'danger')
+            print(err)
+        finally:
+            cur.close()
+            connection.close()
+        #result_files = os.listdir(app.config['RESULT_FOLDER'])
         summaries = {}
         
-        for filename in result_files:
+        '''for filename in result_files:
             with open(os.path.join(app.config['RESULT_FOLDER'], filename), 'r') as file:
-                summaries[filename] = file.read()  # Read content of each result file
+                summaries[filename] = file.read()  # Read content of each result file'''
+                
+        for row in results:
+            blob_data = row[4]
+            decoded_text = blob_data.decode('utf-8')
+            summaries[row[3]] = decoded_text
 
         return render_template('results.html', summaries=summaries)
     
@@ -148,9 +236,7 @@ def create_app():
             if connection.is_connected():
                 cursor.close()
                 connection.close()
-
-
-
+                
     return app
 
 def transcribe_audio(filepath, pipeline):

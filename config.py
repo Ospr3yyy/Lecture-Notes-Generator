@@ -9,6 +9,7 @@ class Config:
 
     # Additional configurations can go here, such as API keys, upload folder paths, etc.
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or 'uploads/'
+    TEMP_FOLDER = os.environ.get('TEMP_FOLDER') or 'temp/'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB limit for file uploads
     
     # MySQL configurations
