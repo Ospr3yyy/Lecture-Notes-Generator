@@ -9,9 +9,13 @@ NLP-Based Lecture Notes Generator Web App for Students Using Speech-to-Text and 
 - pip install flask-pymongo
 - pip install transformers
 - pip install 'transformers[torch]'
+- pip install mysql-connector-python
 
 # Current functionalities
-- 3 webpages:
+- 5 webpages:
+  - login
+    - email check (currently only neoaurellano@gmail.com)
+    - password check (currently only 12345)
   - index
     - home page
     - upload audio file
@@ -23,6 +27,9 @@ NLP-Based Lecture Notes Generator Web App for Students Using Speech-to-Text and 
   - results
     - view results (transcribed and summarized)
     - download file not yet working
+  - test
+    - for checking connection to localhost only
+    - is not redirected from anywhere else
 
 - can upload audio files
   - file type accepted: mp3 only tested so far
