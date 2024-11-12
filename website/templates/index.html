@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lecture Notes Generator</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="../../static/css/styles.css">
     <style>
         #fileInput {
             display: none; /* Hide the default file input */
@@ -12,28 +13,35 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">Welcome to the Lecture Notes Generator</h1>
-        <p>This web app allows you to convert speech to text and summarize lecture notes.</p>
-        
-        <!-- Hidden file input -->
-        <input type="file" id="fileInput" accept="audio/*" onchange="uploadFile()">
 
-        <!-- Button to trigger file input -->
-        <button class="btn btn-primary mt-3" onclick="document.getElementById('fileInput').click();">
-            Upload Audio File
-        </button>
-        
-        <!-- Button to view uploaded audio files -->
-        <a href="/uploads" class="btn btn-secondary mt-3">
-            View Uploaded Audio Files
-        </a>
-        
-        <!-- Button to view summary page -->
-        <a href="/results" class="btn btn-info mt-3">
-            View Results
-        </a>
+    <div class="container">
+        <div class="inside-container">
+            <div class="texts">
+                <h1 class="header">Welcome to the Lecture Notes Generator</h1>
+                <p>This web app allows you to convert speech to text and summarize lecture notes.</p>
+            </div>
+            
+            <div class="buttons">
+                <div class="card" onclick="document.getElementById('fileInput').click();">
+                    <h2>UPLOAD AUDIO FILE</h2>
+                    <p>Upload an audio file for transcription.</p>
+                    <!-- Hidden file input -->
+                    <input type="file" id="fileInput" accept="audio/*" onchange="uploadFile()">
+                </div>
+                
+                <div class="card" onclick="window.location.href='uploads.html';">
+                    <h2>VIEW UPLOADED AUDIO FILES</h2>
+                    <p>Your uploads</p>
+                </div>
+                
+                <div class="card" onclick="window.location.href='results.html';">
+                    <h2>VIEW RESULTS</h2>
+                    <p>View your notes</p>
+                </div>
+            </div>
+        </div>
     </div>
+    
 
     <script>
         function uploadFile() {

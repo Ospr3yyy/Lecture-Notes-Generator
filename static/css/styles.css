@@ -1,0 +1,167 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #ccc;
+    background-color: #000;
+    height: 100%;
+}
+
+@font-face {
+    font-family: 'Horizon Bold';
+    src: url('/fonts/HORIZON_0.OTF') format('opentype');
+    /* Add other formats for better compatibility if needed */
+}
+
+@font-face {
+    font-family: 'HypeBuzz'; 
+    src: url('/fonts/HYPEBUZZ\ OUTLINE_0.OTF') format('opentype');
+    /* Add other formats for better compatibility if needed */
+}
+
+.header {
+    font-family: Horizon Bold, sans-serif;
+    color: #a020f0; 
+    text-shadow: 
+        0 0 2px #a020f0, 
+        0 0 4px #a020f0, 
+        0 0 6px #a020f0
+       ;
+}
+
+.texts{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #222;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    height: 100%;
+    gap: 2rem;
+}
+
+.texts p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    color: #fff;
+}
+
+.inside-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10rem;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12rem;
+}
+
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #333;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(160, 32, 240, 0.5); /* Purple shadow for cards */
+    color: #ccc;
+    height: 350px;
+    width: 300px;
+    gap: 6rem;
+    text-wrap: wrap;
+    
+}
+
+.card:hover {
+    background-color: #a020f0;
+    box-shadow: 0 0 30px goldenrod;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+h2 {
+    font-family: 'HypeBuzz', sans-serif;
+    font-size: 16px;
+    color: white; 
+}
+
+/* Style the table */
+.table {
+    width: 70rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    background-color: #333;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #444;
+    border-radius: 2px;
+    text-align: center; /* Center align text in table cells */
+    transition: background-color 0.5s ease; 
+}
+
+.table th:hover,
+.table td:hover {
+    background-color: goldenrod; 
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #444;
+    color: #ffffff;
+    font-family: 'HypeBuzz', sans-serif;
+}
+
+.table tbody + tbody {
+    border-top: 2px solid #444;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #444;
+}
+
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #a020f0;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: goldenrod;
+    transition: background-color 0.3s ease-in-out;
+}
+
