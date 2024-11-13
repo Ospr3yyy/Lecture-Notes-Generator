@@ -143,7 +143,7 @@ def create_app():
                 except Exception as e:
                     flash('Audio file uploaded successfully as a file in the database!', 'success')
 
-                return render_template('summary.html', transcription=transcribed_text, summary=summarized_text)
+                #return render_template('summary.html', transcription=transcribed_text, summary=summarized_text)
 
         return render_template('uploads.html')
     

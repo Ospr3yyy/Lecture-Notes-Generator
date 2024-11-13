@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../static/css/styles.css">
     <style>
         /* Limit the width of the content column and allow wrapping */
         .content-column {
@@ -15,7 +15,9 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-5">Results of Uploaded Files</h1>
+        <h1 class="header">Results of Uploaded Files</h1>
+
+        
         <table class="table mt-3">
             <thead>
                 <tr>
@@ -28,12 +30,14 @@
                 {% for file, content in summaries.items() %}
                 <tr>
                     <td>{{ file }}</td>
-                    <td class="content-column"><pre>{{ content }}</pre></td> <!-- Add the class to the content column -->
+                    <td class="content-column" style="overflow: scroll;"><pre>{{ content }}</pre></td> <!-- Add the class to the content column -->
                     <td><a href="{{ url_for('uploaded_result', filename=file) }}" class="btn btn-success">Download</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+
         <a href="/index" class="btn btn-primary">Back to Home</a>
     </div>
 </body>
