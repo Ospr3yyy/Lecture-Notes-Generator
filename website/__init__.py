@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from transformers import pipeline
 import os
 import librosa
+import re
 
 def create_app():
     # Initialize Flask app
@@ -61,6 +62,61 @@ def create_app():
                 connection.close()
             
         return render_template('login.html')
+
+    @app.route('/create_account', methods=['GET', 'POST'])
+    def create_account():
+        if request.method == 'POST':
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            conf_pass = request.form['conf_pass']
+            
+            # Establish database connection
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor(dictionary=True)
+            
+            try:
+                # Check if password and confirm password match
+                if password != conf_pass:
+                    flash("Passwords do not match!")
+                    return redirect('/create_account')
+                
+                # Validate email format
+                email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+                if not re.match(email_pattern, email):
+                    flash("Invalid email format. Please enter a valid email.")
+                    return redirect('/create_account')
+                
+                # Check if username already exists
+                existing_username_query = "SELECT * FROM user WHERE username = %s"
+                cursor.execute(existing_username_query, (username,))
+                if cursor.fetchone():
+                    flash("Username already exists!")
+                    return redirect('/create_account')
+                
+                # Check if email already exists
+                existing_email_query = "SELECT * FROM user WHERE email = %s"
+                cursor.execute(existing_email_query, (email,))
+                if cursor.fetchone():
+                    flash("Email already registered!")
+                    return redirect('/create_account')
+                
+                # Register account to database if all checks passed
+                insert_query = "INSERT INTO user (username, email, password) VALUES (%s, %s, %s)"
+                cursor.execute(insert_query, (username, email, password))
+                connection.commit()
+                
+                flash("Account created successfully!")
+                return redirect('/login')
+            
+            except mysql.connector.Error as err:
+                flash(f"Database error: {err}", 'danger')
+            
+            finally:
+                cursor.close()
+                connection.close()
+        
+        return render_template('signup.html')
 
     @app.route('/index')
     def index(): 

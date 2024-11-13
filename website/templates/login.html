@@ -9,10 +9,19 @@
 </head>
 <body>
     <div class="login-box">
-        <form action="/login" method="POST">
-            <div class="login-header">
-                <header>Insta Notes</header>
+        <div class="login-header">
+            <header>Insta Notes</header>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+              {% endfor %}
             </div>
+          {% endif %}
+        {% endwith %}
+        <form action="/login" method="POST">
             <div class="input-box">
                 <input type="text" class="input-field" placeholder="Email"  name="email" autocomplete="off" required>
             </div>

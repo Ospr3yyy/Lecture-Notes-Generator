@@ -122,3 +122,24 @@ section a{
     font-size: 28px;
     font-weight: 600;
 }
+
+.flash-messages {
+    margin-bottom: 1em;
+}
+.flash-message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+.flash-message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.flash-message.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.flash-message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
