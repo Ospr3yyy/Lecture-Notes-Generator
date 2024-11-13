@@ -213,6 +213,10 @@ def create_app():
 
         return render_template('results.html', summaries=summaries)
     
+    @app.route('/signup')
+    def sign_up():
+        return render_template('signup.html')
+    
     @app.route('/test')
     def test_db():
         try:
